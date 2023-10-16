@@ -1,7 +1,7 @@
 import copy
 import json
 import math
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ElementTree
 import datetime
 import os.path
 import uuid
@@ -9,6 +9,7 @@ from pathlib import Path
 import shutil
 
 from astral import Astral
+
 
 def set_duration(static_element, duration):
     for child_static in static_element:
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     # Set command wallpaper set
     command_set_wallpaper = "gsettings set org.gnome.desktop.background " + json_data["theme"] + " file://"
 
-    tree = ET.parse(json_data["original_xml"])
+    tree = ElementTree.parse(json_data["original_xml"])
     root = tree.getroot()
 
     # Count available backgrounds and find last wallpaper for night of new day
@@ -85,4 +86,3 @@ if __name__ == '__main__':
 
     # Set new wallpaper xml
     os.system(command_set_wallpaper)
-
