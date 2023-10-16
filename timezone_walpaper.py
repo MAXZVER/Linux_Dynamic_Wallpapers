@@ -51,7 +51,6 @@ if __name__ == '__main__':
 
     # Set new xnl path
     path_of_new_xml = work_dir / (str(uuid.uuid4().hex) + ".xml")
-    print(path_of_new_xml)
 
     # Calculate time for sunset and sunrise
     a = Astral()
@@ -60,8 +59,8 @@ if __name__ == '__main__':
     sun = city.sun(date=datetime.datetime.now(), local=True)
     today = datetime.datetime.now()
     new_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
-    sun_is_down_new_day = sun['sunrise'].timestamp() - new_day.timestamp()
-    sun_is_up = ((sun['sunset'] - sun['sunrise']).total_seconds())
+    sun_is_down_new_day = sun['dawn'].timestamp() - new_day.timestamp()
+    sun_is_up = ((sun['dusk'] - sun['dawn']).total_seconds())
 
     # Segment of change image
     sun_is_up_time_segment = math.ceil(sun_is_up / (all_available_backgrounds - 1))
