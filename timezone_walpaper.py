@@ -5,43 +5,83 @@ import xml.etree.ElementTree as ElementTree
 import datetime
 import os.path
 import uuid
-from pathlib import Path
 import shutil
 
+from pathlib import Path
 from astral import Astral
 
 
-def set_duration(static_element, duration):
-    for child_static in static_element:
-        if child_static.tag == "duration":
-            child_static.text = str(duration)
+def create_static_element(root_element, path_to_image, duration):
+    static_element = ElementTree.Element("static")
+
+    file_element = ElementTree.SubElement(static_element, "file")
+    file_element.text = str(path_to_image)
+
+    duration_element = ElementTree.SubElement(static_element, "duration")
+    duration_element.text = str(duration)
+
+    root_element.append(static_element)
+
+
+def create_start_time_section(root_element):
+    starttime_element = ElementTree.Element("starttime")
+
+    year_element = ElementTree.SubElement(starttime_element, "year")
+    year_element.text = "2023"
+
+    mouth_element = ElementTree.SubElement(starttime_element, "month")
+    mouth_element.text = "1"
+
+    day_element = ElementTree.SubElement(starttime_element, "day")
+    day_element.text = "1"
+
+    hour_element = ElementTree.SubElement(starttime_element, "hour")
+    hour_element.text = "0"
+
+    minute_element = ElementTree.SubElement(starttime_element, "minute")
+    minute_element.text = "0"
+
+    second_element = ElementTree.SubElement(starttime_element, "second")
+    second_element.text = "0"
+
+    root_element.append(starttime_element)
+
+
+def indent(elem, level=0):
+    i = "\n" + level * "  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indent(elem, level + 1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i
 
 
 if __name__ == '__main__':
     # Load config file
+
     standard_config_path = Path(os.path.dirname(os.path.abspath(__file__))) / "config.json"
     json_file = open(standard_config_path, "rb")
     json_data = json.load(json_file)
+    json_file.close()
 
     # Set command wallpaper set
     command_set_wallpaper = "gsettings set org.gnome.desktop.background " + json_data["theme"] + " file://"
 
-    tree = ElementTree.parse(json_data["original_xml"])
-    root = tree.getroot()
+    root_element = ElementTree.Element("background")
+    create_start_time_section(root_element)
 
-    # Count available backgrounds and find last wallpaper for night of new day
-    all_available_backgrounds = 0
-    first = False
-    count_insert = 0
-    for count, child in enumerate(root):
-        if child.tag == "static":
-            if not first:
-                first = True
-                count_insert = count
-            all_available_backgrounds += 1
-    # Copy last night element
-    last_night_element = root[count_insert + all_available_backgrounds - 1]
-    inserted_element = copy.deepcopy(root[count_insert + all_available_backgrounds - 1])
+    path_to_image_dir = os.path.realpath(json_data["image_dir"])
+    list_images = os.listdir(path_to_image_dir)
+    list_images.sort()
+
+    all_available_backgrounds = len(list_images)
 
     # Create work dir for create new xml file
     work_dir = Path(os.path.dirname(os.path.abspath(__file__))) / "work_dir"
@@ -59,7 +99,9 @@ if __name__ == '__main__':
     sun = city.sun(date=datetime.datetime.now(), local=True)
     today = datetime.datetime.now()
     new_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
+
     sun_is_down_new_day = sun['dawn'].timestamp() - new_day.timestamp()
+
     sun_is_up = ((sun['dusk'] - sun['dawn']).total_seconds())
 
     # Segment of change image
@@ -67,19 +109,18 @@ if __name__ == '__main__':
 
     sun_is_down_old_day = 24 * 60 * 60 - sun_is_down_new_day - sun_is_up_time_segment * (all_available_backgrounds - 1)
 
-    for count, child in enumerate(root):
-        if child.tag == "static":
-            set_duration(child, sun_is_up_time_segment)
-
-    # Set nighttime for last and first image
-    set_duration(last_night_element, sun_is_down_old_day)
-    set_duration(inserted_element, sun_is_down_new_day)
-
-    # Insert in first position night new day image
-    root.insert(count_insert, inserted_element)
+    create_static_element(root_element, os.path.join(path_to_image_dir, list_images[-1]), sun_is_down_new_day)
+    for image in list_images[:-1]:
+        create_static_element(root_element, os.path.join(path_to_image_dir, image), sun_is_up_time_segment)
+    create_static_element(root_element, os.path.join(path_to_image_dir, list_images[-1]), sun_is_down_old_day)
 
     # Write new xml file
-    tree.write(str(path_of_new_xml))
+    indent(root_element)
+    str_data = ElementTree.tostring(root_element)
+
+    xml_file = open(path_of_new_xml, "wb")
+    xml_file.write(str_data)
+    xml_file.close()
 
     command_set_wallpaper += str(path_of_new_xml)
 
