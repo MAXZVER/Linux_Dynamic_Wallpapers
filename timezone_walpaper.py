@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     path_to_image_dir = os.path.realpath(json_data["image_dir"])
     list_images = os.listdir(path_to_image_dir)
-    list_images.sort()
+    list_images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
     all_available_backgrounds = len(list_images)
 
