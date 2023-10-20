@@ -66,7 +66,9 @@ def indent(elem, level=0):
 if __name__ == '__main__':
     # Load config file
 
-    standard_config_path = Path(os.path.dirname(os.path.abspath(__file__))) / "config.json"
+    path_to_script_dir = os.path.realpath(os.path.dirname(os.path.abspath(__file__)))
+
+    standard_config_path = Path(path_to_script_dir) / "config.json"
     json_file = open(standard_config_path, "rb")
     json_data = json.load(json_file)
     json_file.close()
@@ -77,7 +79,7 @@ if __name__ == '__main__':
     root_element = ElementTree.Element("background")
     create_start_time_section(root_element)
 
-    path_to_image_dir = os.path.realpath(json_data["image_dir"])
+    path_to_image_dir = os.path.join(path_to_script_dir, json_data["image_dir"])
     list_images = os.listdir(path_to_image_dir)
     list_images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
 
