@@ -27,7 +27,7 @@ def create_start_time_section(root_element):
     starttime_element = ElementTree.Element("starttime")
 
     year_element = ElementTree.SubElement(starttime_element, "year")
-    year_element.text = "2023"
+    year_element.text = str(datetime.date.today().year)
 
     mouth_element = ElementTree.SubElement(starttime_element, "month")
     mouth_element.text = "1"
