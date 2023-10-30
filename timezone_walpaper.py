@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     # Set command wallpaper set
     if json_data["old_ubuntu"]:
-        command_set_wallpaper_ubuntu_20 = "gsettings set org.gnome.desktop.background picture-uri" + " file://"
+        command_set_wallpaper = "gsettings set org.gnome.desktop.background picture-uri" + " file://"
     else:
         command_set_wallpaper = "gsettings set org.gnome.desktop.background " + json_data["theme"] + " file://"
 
