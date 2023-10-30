@@ -75,7 +75,10 @@ if __name__ == '__main__':
     json_file.close()
 
     # Set command wallpaper set
-    command_set_wallpaper = "gsettings set org.gnome.desktop.background " + json_data["theme"] + " file://"
+    if json_data["old_ubuntu"]:
+        command_set_wallpaper_ubuntu_20 = "gsettings set org.gnome.desktop.background picture-uri" + " file://"
+    else:
+        command_set_wallpaper = "gsettings set org.gnome.desktop.background " + json_data["theme"] + " file://"
 
     root_element = ElementTree.Element("background")
     create_start_time_section(root_element)
