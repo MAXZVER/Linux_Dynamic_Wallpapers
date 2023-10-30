@@ -1,5 +1,9 @@
 {
   "image_dir":"Dynamic_Wallpapers/LakesideDeerComplete",
+  "theme": "picture-uri-dark",
   "city": "Moscow",
-  "theme": "picture-uri-dark"
+  "country": "Russian Federation",
+  "timezone": "Europe/Moscow",
+  "latitude": 55.751244,
+  "longitude": 37.618423
 }

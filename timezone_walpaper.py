@@ -8,7 +8,8 @@ import uuid
 import shutil
 
 from pathlib import Path
-from astral import Astral
+from astral.sun import sun as astral_sun
+from astral import LocationInfo
 
 
 def create_static_element(root_element, path_to_image, duration):
@@ -95,16 +96,15 @@ if __name__ == '__main__':
     path_of_new_xml = work_dir / (str(uuid.uuid4().hex) + ".xml")
 
     # Calculate time for sunset and sunrise
-    a = Astral()
-    a.solar_depression = 'civil'
-    city = a[json_data["city"]]
-    sun = city.sun(date=datetime.datetime.now(), local=True)
+
+    city = LocationInfo(json_data["city"], json_data["country"], json_data["timezone"], json_data["latitude"],
+                        json_data["longitude"])
+    sun = astral_sun(city.observer, date=datetime.datetime.now())
     today = datetime.datetime.now()
     new_day = today.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    sun_is_down_new_day = sun['dawn'].timestamp() - new_day.timestamp()
-
-    sun_is_up = ((sun['dusk'] - sun['dawn']).total_seconds())
+    sun_is_down_new_day = math.ceil(sun['dawn'].timestamp() - new_day.timestamp())
+    sun_is_up = math.ceil(sun['dusk'].timestamp() - sun['dawn'].timestamp())
 
     # Segment of change image
     sun_is_up_time_segment = math.ceil(sun_is_up / (all_available_backgrounds - 1))
