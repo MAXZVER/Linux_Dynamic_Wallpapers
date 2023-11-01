@@ -1,0 +1,6 @@
+
+[:python_version < "3.9"]
+backports.zoneinfo
+
+[:sys_platform == "win32"]
+tzdata
